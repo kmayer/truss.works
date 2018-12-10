@@ -28,6 +28,7 @@ class CSVNormal
       CSV.parse(utf_8, options) do |row|
         begin
           row['Timestamp'] = convert_time(row) if row.has_key?('Timestamp')
+          row['ZIP'] = convert_zip(row) if row.has_key?('ZIP')
           csv_out << row
         rescue => e
           io_err.puts e.message
@@ -48,5 +49,9 @@ class CSVNormal
     # Convert to US/Eastern
     time = time.getlocal(time.isdst ? "-04:00" : "-05:00")
     time.iso8601
+  end
+
+  def convert_zip(row)
+    row.fetch('ZIP').strip.rjust(5, '00000')
   end
 end

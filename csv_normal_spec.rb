@@ -6,13 +6,16 @@ describe CSVNormal do
   let(:stdout) { StringIO.new }
   let(:stderr) { StringIO.new }
 
+  after(:each) do
+    expect(stderr.string).to be_empty
+  end
+
   it "reads from an io and writes to an io" do
     normalizer = CSVNormal.new(stdin, stdout, stderr)
 
     normalizer.()
 
     expect(stdout.string).to eq("CSV\nrow\n")
-    expect(stderr.string).to be_empty
   end
 
   it "can be run from the command line" do
@@ -30,7 +33,6 @@ describe CSVNormal do
       normalizer.()
 
       expect(stdout.string.valid_encoding?).to be_truthy
-      expect(stderr.string).to be_empty
     end
   end
 
@@ -42,7 +44,6 @@ describe CSVNormal do
       normalizer.()
 
       expect(stdout.string.valid_encoding?).to be_truthy
-      expect(stderr.string).to be_empty
     end
   end
 
@@ -63,6 +64,25 @@ describe CSVNormal do
     normalizer.()
 
     expect(stdout.string).to eq("Timestamp\n2011-04-01T14:00:00-04:00\n")
+  end
+
+  it "formats ZIP codes as 5 digits" do
+    {
+      "12345" => "12345",
+      "1"     => "00001",
+      "12\n"  => "00012",
+      " 123"  => "00123",
+      "1234 " => "01234",
+    }.each do |input, expected|
+      stdin = StringIO.new("ZIP\n#{input}")
+      stdout = StringIO.new
+
+      normalizer = CSVNormal.new(stdin, stdout, stderr)
+
+      normalizer.()
+
+      expect(stdout.string).to eq("ZIP\n#{expected}\n")
+    end
   end
 
   after(:all) do
