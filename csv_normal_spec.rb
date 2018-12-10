@@ -105,6 +105,16 @@ describe CSVNormal do
     end
   end
 
+  it "columns that have embedded commas are okay if they are quote-escaped" do
+    stdin = StringIO.new("Address\n\"I,am,okay,really\"")
+
+    normalizer = CSVNormal.new(stdin, stdout, stderr)
+
+    normalizer.()
+
+    expect(stdout.string).to eq("Address\n\"I,am,okay,really\"\n")
+  end
+
   after(:all) do
     FileUtils.rm_f("./test01_out.csv")
   end
