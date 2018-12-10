@@ -30,6 +30,8 @@ class CSVNormal
           row['Timestamp'] = convert_time(row) if row.has_key?('Timestamp')
           row['ZIP'] = convert_zip(row) if row.has_key?('ZIP')
           row['FullName'] = upcase_name(row) if row.has_key?('FullName')
+          row['FooDuration'] = convert_float_time(row.fetch('FooDuration')) if row.has_key?('FooDuration')
+          row['BarDuration'] = convert_float_time(row.fetch('BarDuration')) if row.has_key?('FooDuration')
           csv_out << row
         rescue => e
           io_err.puts e.message
@@ -58,5 +60,12 @@ class CSVNormal
 
   def upcase_name(row)
     row.fetch('FullName').strip.upcase
+  end
+
+  def convert_float_time(col)
+    %r{(?<hour>\d+):(?<min>\d{2}):(?<sec>\d{2})\.(?<ms>\d{3})}
+      .match(col) { |m|
+        Float(m[:hour]) * 3600 + Float(m[:min]) * 60 + Float(m[:sec]) + Float(m[:ms]) / 1000
+      }
   end
 end
