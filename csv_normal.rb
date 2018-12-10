@@ -8,7 +8,7 @@ class CSVNormal
   attr_reader :io_in, :io_out, :io_err
 
   def initialize(io_in, io_out, io_err)
-    @io_in = io_in
+    @io_in  = io_in
     @io_out = io_out
     @io_err = io_err
   end
@@ -18,28 +18,14 @@ class CSVNormal
 
     headers = CSV.parse_line(io_in.readline.encode("UTF-8", invalid: :replace))
     csv_out << headers
+    options = { headers: headers }
 
     io_in.readlines.each do |line|
       utf_8 = line.encode("UTF-8", invalid: :replace)
 
-      options = {
-        headers: headers
-      }
-
       CSV.parse(utf_8, options) do |row|
         begin
-          row['Timestamp'] = convert_time(row.fetch('Timestamp')) if row.has_key?('Timestamp')
-          row['ZIP'] = convert_zip(row.fetch('ZIP')) if row.has_key?('ZIP')
-          row['FullName'] = upcase_name(row.fetch('FullName')) if row.has_key?('FullName')
-          row['FooDuration'] = convert_float_time(row.fetch('FooDuration')) if row.has_key?('FooDuration')
-          row['BarDuration'] = convert_float_time(row.fetch('BarDuration')) if row.has_key?('BarDuration')
-          row['TotalDuration'] = (row['FooDuration'] + row['BarDuration']) if row.has_key?('TotalDuration')
-
-          %w[FooDuration BarDuration TotalDuration].each do |float_col|
-            row[float_col] = row.fetch(float_col).to_f if row.has_key?(float_col)
-          end
-
-          csv_out << row
+          csv_out << convert_row(row)
         rescue => e
           io_err.puts e.message
           io_err.puts ">>> #{line}"
@@ -53,6 +39,21 @@ class CSVNormal
   end
 
   private
+
+  def convert_row(data)
+    data.tap {|row|
+      row['Timestamp']     = convert_time(row.fetch('Timestamp')) if row.has_key?('Timestamp')
+      row['ZIP']           = convert_zip(row.fetch('ZIP')) if row.has_key?('ZIP')
+      row['FullName']      = upcase_name(row.fetch('FullName')) if row.has_key?('FullName')
+      row['FooDuration']   = convert_float_time(row.fetch('FooDuration')) if row.has_key?('FooDuration')
+      row['BarDuration']   = convert_float_time(row.fetch('BarDuration')) if row.has_key?('BarDuration')
+      row['TotalDuration'] = (row['FooDuration'] + row['BarDuration']) if row.has_key?('TotalDuration')
+
+      %w[FooDuration BarDuration TotalDuration].each do |float_col|
+        row[float_col] = row.fetch(float_col).to_f if row.has_key?(float_col)
+      end
+    }
+  end
 
   def convert_time(col)
     time = Time.strptime("#{col} US/Pacific", "%D %r %Z")
