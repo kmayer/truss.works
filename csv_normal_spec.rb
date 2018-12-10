@@ -52,7 +52,17 @@ describe CSVNormal do
 
     normalizer.()
 
-    expect(stdout.string).to eq("Timestamp\n2011-04-01T11:00:00-07:00\n")
+    expect(stdout.string).to eq("Timestamp\n2011-04-01T14:00:00-04:00\n")
+  end
+
+  it "converts all the timestamps from US/Pacific to US/Eastern" do
+    stdin = StringIO.new("Timestamp\n4/1/11 11:00:00 AM")
+
+    normalizer = CSVNormal.new(stdin, stdout, stderr)
+
+    normalizer.()
+
+    expect(stdout.string).to eq("Timestamp\n2011-04-01T14:00:00-04:00\n")
   end
 
   after(:all) do

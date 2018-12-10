@@ -27,7 +27,7 @@ class CSVNormal
 
       CSV.parse(utf_8, options) do |row|
         begin
-          row['Timestamp'] = Time.strptime(row['Timestamp'], "%D %r").iso8601 if row.has_key?('Timestamp')
+          row['Timestamp'] = convert_time(row) if row.has_key?('Timestamp')
           csv_out << row
         rescue => e
           io_err.puts e.message
@@ -39,5 +39,14 @@ class CSVNormal
     io_in.close
     io_out.close
     io_err.close
+  end
+
+  private
+
+  def convert_time(row)
+    time = Time.strptime("#{row.fetch('Timestamp')} US/Pacific", "%D %r %Z")
+    # Convert to US/Eastern
+    time = time.getlocal(time.isdst ? "-04:00" : "-05:00")
+    time.iso8601
   end
 end
