@@ -2,6 +2,7 @@
 
 require 'csv'
 require 'time'
+require 'bigdecimal'
 
 class CSVNormal
   attr_reader :io_in, :io_out, :io_err
@@ -31,8 +32,13 @@ class CSVNormal
           row['ZIP'] = convert_zip(row.fetch('ZIP')) if row.has_key?('ZIP')
           row['FullName'] = upcase_name(row.fetch('FullName')) if row.has_key?('FullName')
           row['FooDuration'] = convert_float_time(row.fetch('FooDuration')) if row.has_key?('FooDuration')
-          row['BarDuration'] = convert_float_time(row.fetch('BarDuration')) if row.has_key?('FooDuration')
-          row['TotalDuration'] = row['FooDuration'].to_f + row['BarDuration'].to_f if row.has_key?('TotalDuration')
+          row['BarDuration'] = convert_float_time(row.fetch('BarDuration')) if row.has_key?('BarDuration')
+          row['TotalDuration'] = (row['FooDuration'] + row['BarDuration']) if row.has_key?('TotalDuration')
+
+          %w[FooDuration BarDuration TotalDuration].each do |float_col|
+            row[float_col] = row.fetch(float_col).to_f if row.has_key?(float_col)
+          end
+
           csv_out << row
         rescue => e
           io_err.puts e.message
@@ -66,7 +72,7 @@ class CSVNormal
   def convert_float_time(col)
     %r{(?<hour>\d+):(?<min>\d{2}):(?<sec>\d{2})\.(?<ms>\d{3})}
       .match(col) { |m|
-        Float(m[:hour]) * 3600 + Float(m[:min]) * 60 + Float(m[:sec]) + Float(m[:ms]) / 1000
+        Integer(m[:hour]) * 3600 + Integer(m[:min]) * 60 + Integer(m[:sec]) + BigDecimal.new("0.#{m[:ms]}")
       }
   end
 end
