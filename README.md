@@ -1,5 +1,7 @@
 # The Run Book
 
+[![CircleCI](https://circleci.com/gh/kmayer/truss.works.svg?style=svg)](https://circleci.com/gh/kmayer/truss.works)
+
 Built using Ruby 2.5.1
 
 - To run tests: `rspec csv_normal_spec.rb`
