@@ -25,6 +25,10 @@ describe CSVNormal do
     expect(FileUtils.compare_file("./test01.csv", "./test01_out.csv")).to be_truthy
   end
 
+  after(:all) do
+    FileUtils.rm_f("./test01_out.csv")
+  end
+
   it "normalizes the output to UTF-8." do
     File.open("./sample.csv", "r") do |f|
       stdout     = StringIO.new
@@ -137,9 +141,5 @@ describe CSVNormal do
     normalizer.()
 
     expect(stdout.string).to eq("FooDuration,BarDuration,TotalDuration\n#{foo_duration},#{bar_duration},#{foo_duration + bar_duration}\n")
-  end
-
-  after(:all) do
-    FileUtils.rm_f("./test01_out.csv")
   end
 end
