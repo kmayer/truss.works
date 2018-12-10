@@ -127,6 +127,18 @@ describe CSVNormal do
     expect(stdout.string).to eq("FooDuration,BarDuration\n#{foo_duration},#{bar_duration}\n")
   end
 
+  it "TotalDuration = FooDuration + BarDuration" do
+    stdin = StringIO.new("FooDuration,BarDuration,TotalDuration\n1:23:32.123,1:32:33.123,I am a blue monkey that says dadadadada")
+    foo_duration = 1 * 3600 + 23 * 60 + 32 + 0.123
+    bar_duration = 1 * 3600 + 32 * 60 + 33 + 0.123
+
+    normalizer = CSVNormal.new(stdin, stdout, stderr)
+
+    normalizer.()
+
+    expect(stdout.string).to eq("FooDuration,BarDuration,TotalDuration\n#{foo_duration},#{bar_duration},#{foo_duration + bar_duration}\n")
+  end
+
   after(:all) do
     FileUtils.rm_f("./test01_out.csv")
   end

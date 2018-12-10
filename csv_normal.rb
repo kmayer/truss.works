@@ -32,6 +32,7 @@ class CSVNormal
           row['FullName'] = upcase_name(row.fetch('FullName')) if row.has_key?('FullName')
           row['FooDuration'] = convert_float_time(row.fetch('FooDuration')) if row.has_key?('FooDuration')
           row['BarDuration'] = convert_float_time(row.fetch('BarDuration')) if row.has_key?('FooDuration')
+          row['TotalDuration'] = row['FooDuration'].to_f + row['BarDuration'].to_f if row.has_key?('TotalDuration')
           csv_out << row
         rescue => e
           io_err.puts e.message
