@@ -56,10 +56,14 @@ class CSVNormal
   end
 
   def convert_time(col)
-    time = Time.strptime("#{col} US/Pacific", "%D %r %Z")
+    old_tz, ENV['TZ'] = ENV['TZ'], "US/Pacific"
+
+    time = Time.strptime("#{col}", "%D %r")
     # Convert to US/Eastern
     time = time.getlocal(time.isdst ? "-04:00" : "-05:00")
     time.iso8601
+  ensure
+    ENV['TZ'] = old_tz
   end
 
   def convert_zip(col)
