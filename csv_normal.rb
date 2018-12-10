@@ -12,19 +12,19 @@ class CSVNormal
   end
 
   def call
-    headers = CSV.parse_line(io_in.readline.encode("UTF-8", invalid: :replace))
+    headers = CSV.parse_line(encoded(io_in.readline))
     csv_out << headers
     options = { headers: headers }.freeze
 
-    io_in.readlines.each.with_index(1) do |line, index|
-      utf_8 = line.encode("UTF-8", invalid: :replace)
+    io_in.readlines.each.with_index(1) do |line, line_number|
+      utf_8 = encoded(line)
 
       CSV.parse(utf_8, options) do |row|
         begin
           csv_out << convert_row(row)
         rescue => e
           io_err.puts e.message
-          io_err.puts ">>>LINE #{index}: #{line}"
+          io_err.puts ">>>LINE #{line_number}: #{line}"
         end
       end
     end
@@ -35,6 +35,10 @@ class CSVNormal
   end
 
   private
+
+  def encoded(string)
+    string.encode("UTF-8", invalid: :replace)
+  end
 
   def convert_row(data)
     data.tap { |row|
@@ -69,7 +73,7 @@ class CSVNormal
   def convert_float_time(col)
     %r{(?<hour>\d+):(?<min>\d{2}):(?<sec>\d{2})\.(?<ms>\d{3})}
       .match(col) { |m|
-        Integer(m[:hour]) * 3600 + Integer(m[:min]) * 60 + Integer(m[:sec]) + BigDecimal.new("0.#{m[:ms]}")
+        Integer(m[:hour]) * 3600 + Integer(m[:min]) * 60 + Integer(m[:sec]) + BigDecimal.new("0.#{m[:ms]}", 3)
       }
   end
 end
