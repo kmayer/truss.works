@@ -20,7 +20,7 @@ class CSVNormal
     csv_out << headers
     options = { headers: headers }
 
-    io_in.readlines.each do |line|
+    io_in.readlines.each.with_index(1) do |line, index|
       utf_8 = line.encode("UTF-8", invalid: :replace)
 
       CSV.parse(utf_8, options) do |row|
@@ -28,7 +28,7 @@ class CSVNormal
           csv_out << convert_row(row)
         rescue => e
           io_err.puts e.message
-          io_err.puts ">>> #{line}"
+          io_err.puts ">>>LINE #{index}: #{line}"
         end
       end
     end
