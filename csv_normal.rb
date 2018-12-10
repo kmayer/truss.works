@@ -29,6 +29,7 @@ class CSVNormal
         begin
           row['Timestamp'] = convert_time(row) if row.has_key?('Timestamp')
           row['ZIP'] = convert_zip(row) if row.has_key?('ZIP')
+          row['FullName'] = upcase_name(row) if row.has_key?('FullName')
           csv_out << row
         rescue => e
           io_err.puts e.message
@@ -53,5 +54,9 @@ class CSVNormal
 
   def convert_zip(row)
     row.fetch('ZIP').strip.rjust(5, '00000')
+  end
+
+  def upcase_name(row)
+    row.fetch('FullName').strip.upcase
   end
 end

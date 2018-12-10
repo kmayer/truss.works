@@ -85,6 +85,26 @@ describe CSVNormal do
     end
   end
 
+  it "upcases all name columns" do
+    {
+      "Monkey Alberto"   => "MONKEY ALBERTO",
+      "Superman übertan" => "SUPERMAN ÜBERTAN",
+      "Résumé Ron"       => "RÉSUMÉ RON",
+      "Mary 1"           => "MARY 1",
+      "株式会社スタジオジブリ "     => "株式会社スタジオジブリ",
+      "HERE WE GO"       => "HERE WE GO",
+    }.each do |input, expected|
+      stdin = StringIO.new("FullName\n#{input}")
+      stdout = StringIO.new
+
+      normalizer = CSVNormal.new(stdin, stdout, stderr)
+
+      normalizer.()
+
+      expect(stdout.string).to eq("FullName\n#{expected}\n")
+    end
+  end
+
   after(:all) do
     FileUtils.rm_f("./test01_out.csv")
   end
