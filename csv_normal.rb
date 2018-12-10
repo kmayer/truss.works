@@ -58,7 +58,7 @@ class CSVNormal
   def convert_time(col)
     old_tz, ENV['TZ'] = ENV['TZ'], "US/Pacific"
 
-    time = Time.strptime("#{col}", "%D %r")
+    time = Time.strptime(col, "%D %r")
     # Convert to US/Eastern
     time = time.getlocal(time.isdst ? "-04:00" : "-05:00")
     time.iso8601
