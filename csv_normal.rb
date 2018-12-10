@@ -27,9 +27,9 @@ class CSVNormal
 
       CSV.parse(utf_8, options) do |row|
         begin
-          row['Timestamp'] = convert_time(row) if row.has_key?('Timestamp')
-          row['ZIP'] = convert_zip(row) if row.has_key?('ZIP')
-          row['FullName'] = upcase_name(row) if row.has_key?('FullName')
+          row['Timestamp'] = convert_time(row.fetch('Timestamp')) if row.has_key?('Timestamp')
+          row['ZIP'] = convert_zip(row.fetch('ZIP')) if row.has_key?('ZIP')
+          row['FullName'] = upcase_name(row.fetch('FullName')) if row.has_key?('FullName')
           row['FooDuration'] = convert_float_time(row.fetch('FooDuration')) if row.has_key?('FooDuration')
           row['BarDuration'] = convert_float_time(row.fetch('BarDuration')) if row.has_key?('FooDuration')
           csv_out << row
@@ -47,19 +47,19 @@ class CSVNormal
 
   private
 
-  def convert_time(row)
-    time = Time.strptime("#{row.fetch('Timestamp')} US/Pacific", "%D %r %Z")
+  def convert_time(col)
+    time = Time.strptime("#{col} US/Pacific", "%D %r %Z")
     # Convert to US/Eastern
     time = time.getlocal(time.isdst ? "-04:00" : "-05:00")
     time.iso8601
   end
 
-  def convert_zip(row)
-    row.fetch('ZIP').strip.rjust(5, '00000')
+  def convert_zip(col)
+    col.strip.rjust(5, '00000')
   end
 
-  def upcase_name(row)
-    row.fetch('FullName').strip.upcase
+  def upcase_name(col)
+    col.strip.upcase
   end
 
   def convert_float_time(col)
