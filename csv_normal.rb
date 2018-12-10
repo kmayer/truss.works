@@ -17,15 +17,12 @@ class CSVNormal
     options = { headers: headers }.freeze
 
     io_in.readlines.each.with_index(1) do |line, line_number|
-      utf_8 = encoded(line)
-
-      CSV.parse(utf_8, options) do |row|
-        begin
-          csv_out << convert_row(row)
-        rescue => e
-          io_err.puts e.message
-          io_err.puts ">>>LINE #{line_number}: #{line}"
-        end
+      begin
+        row = CSV.parse_line(encoded(line), options)
+        csv_out << convert_row(row)
+      rescue => e
+        io_err.puts e.message
+        io_err.puts ">>>LINE #{line_number}: #{line}"
       end
     end
   ensure
