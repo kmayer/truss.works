@@ -1,24 +1,20 @@
-# encoding: UTF-8
-
 require 'csv'
 require 'time'
 require 'bigdecimal'
 
 class CSVNormal
-  attr_reader :io_in, :io_out, :io_err
+  attr_reader :io_in, :csv_out, :io_err
 
   def initialize(io_in, io_out, io_err)
-    @io_in  = io_in
-    @io_out = io_out
-    @io_err = io_err
+    @io_in   = io_in
+    @csv_out = CSV.new(io_out)
+    @io_err  = io_err
   end
 
   def call
-    csv_out = CSV.new(io_out)
-
     headers = CSV.parse_line(io_in.readline.encode("UTF-8", invalid: :replace))
     csv_out << headers
-    options = { headers: headers }
+    options = { headers: headers }.freeze
 
     io_in.readlines.each.with_index(1) do |line, index|
       utf_8 = line.encode("UTF-8", invalid: :replace)
@@ -32,16 +28,16 @@ class CSVNormal
         end
       end
     end
-
+  ensure
     io_in.close
-    io_out.close
+    csv_out.close
     io_err.close
   end
 
   private
 
   def convert_row(data)
-    data.tap {|row|
+    data.tap { |row|
       row['Timestamp']     = convert_time(row.fetch('Timestamp')) if row.has_key?('Timestamp')
       row['ZIP']           = convert_zip(row.fetch('ZIP')) if row.has_key?('ZIP')
       row['FullName']      = upcase_name(row.fetch('FullName')) if row.has_key?('FullName')
